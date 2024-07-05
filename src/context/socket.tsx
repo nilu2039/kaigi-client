@@ -8,9 +8,9 @@ const SocketContext = React.createContext<Socket | null>(null);
 
 export const useSocket = () => {
   const context = useContext(SocketContext);
-  if (!context) {
-    throw new Error("useSocket must be used within a SocketProvider");
-  }
+  // if (!context) {
+  //   throw new Error("useSocket must be used within a SocketProvider");
+  // }
   return context;
 };
 
