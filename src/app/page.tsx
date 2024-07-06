@@ -1,6 +1,6 @@
 "use client";
 
-import { AspectRatio } from "@/components/ui/aspect-ratio";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Player from "@/components/ui/player";
 import { useSocket } from "@/context/socket";
@@ -9,9 +9,13 @@ import usePeer from "@/hooks/usePeer";
 import usePlayer from "@/hooks/usePlayer";
 import { SOCKET_EVENTS } from "@/lib/constants";
 import { cn, sleep } from "@/lib/utils";
-import { cva } from "class-variance-authority";
-import React, { useEffect, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { useMediaQuery } from "react-responsive";
+
+type Chat = {
+  content: string;
+  senderPeerId: string;
+};
 
 const Home = () => {
   const { myId, peer } = usePeer();
@@ -22,16 +26,18 @@ const Home = () => {
   });
   const [waitingForMatch, setWaitingForMatch] = useState(false);
   const [showInitScreen, setShowInitScreen] = useState(true);
+  const [roomId, setRoomId] = useState<string | null>(null);
+  const [chats, setChats] = useState<Chat[]>([]);
+  const [chatInput, setChatInput] = useState<string>("");
 
-  const isMobileView = useMediaQuery({ query: "(max-width: 518px)" });
-  const isTabView = useMediaQuery({ query: "(max-width: 519px)" });
-  console.log("isMobile", isMobileView);
+  const isMobileView = useMediaQuery({ query: "(max-width: 750px)" });
 
   useEffect(() => {
     if (!socket) return;
     socket.on(SOCKET_EVENTS.MATCH_FOUND, (roomId: string | null) => {
       if (!roomId || !myId) return;
       console.log("Match found", roomId, myId);
+      setRoomId(roomId);
       setWaitingForMatch(false);
       socket.emit(SOCKET_EVENTS.JOIN_ROOM, myId, roomId);
     });
@@ -96,6 +102,41 @@ const Home = () => {
       });
     });
   }, [peer, setPlayer, socket, mediaStream]);
+
+  useEffect(() => {
+    if (!socket || !myId) return;
+    socket.on(SOCKET_EVENTS.MESSAGE_SENT, (peerId: string, message: string) => {
+      console.log("Message received", peerId, message);
+      setChats((prev) => {
+        return [
+          ...prev,
+          {
+            content: message,
+            senderPeerId: peerId,
+          },
+        ];
+      });
+    });
+    return () => {
+      socket.off(SOCKET_EVENTS.MESSAGE_SENT);
+    };
+  }, [socket, myId]);
+
+  const handleChat = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!socket || !myId || !roomId) return;
+    socket.emit(SOCKET_EVENTS.MESSAGE_SENT, roomId, myId, chatInput);
+    setChats((prev) => {
+      return [
+        ...prev,
+        {
+          content: chatInput,
+          senderPeerId: myId,
+        },
+      ];
+    });
+    setChatInput("");
+  };
 
   const handlePlayerView = () => {
     if (isMobileView) {
@@ -174,11 +215,38 @@ const Home = () => {
         }}
       >
         {handlePlayerView()}
-        <div className="flex h-full w-full items-center justify-center border rounded-lg shadow-xl relative">
-          <h1>chat</h1>
-          <div className="absolute bottom-0 p-2 w-full">
-            <Input placeholder="say hi..." />
+        <div className="flex h-full w-full items-center justify-center rounded-lg flex-col shadow-xl border">
+          <div className="flex flex-col h-full w-full overflow-auto gap-4 p-4 border-none">
+            {chats.map((chat, index) => {
+              return (
+                <div key={index} className="flex">
+                  <p
+                    className={cn(
+                      "text-lg font-normal flex-wrap inline-block bg-slate-200 px-4 py-1 rounded-xl",
+                      {
+                        "ml-auto": chat.senderPeerId !== myId,
+                        "bg-green-200": chat.senderPeerId !== myId,
+                      }
+                    )}
+                    style={{}}
+                  >
+                    {chat.content}
+                  </p>
+                </div>
+              );
+            })}
           </div>
+          <form
+            className="sticky p-2 w-full flex flex-row gap-4"
+            onSubmit={handleChat}
+          >
+            <Input
+              placeholder="say hi..."
+              value={chatInput}
+              onChange={(e) => setChatInput(e.target.value)}
+            />
+            <Button>Send</Button>
+          </form>
         </div>
       </div>
     );

@@ -8,4 +8,5 @@ export const SOCKET_EVENTS = {
   USER_CONNECTED: "user-connected",
   MATCH_FOUND: "match-found",
   WAITING_FOR_MATCH: "waiting-for-match",
+  MESSAGE_SENT: "message-sent",
 };
