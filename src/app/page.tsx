@@ -3,13 +3,15 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Player from "@/components/ui/player";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useSocket } from "@/context/socket";
 import useMediaStream from "@/hooks/useMediaStream";
 import usePeer from "@/hooks/usePeer";
 import usePlayer from "@/hooks/usePlayer";
 import { SOCKET_EVENTS } from "@/lib/constants";
 import { cn, sleep } from "@/lib/utils";
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import { useMediaQuery } from "react-responsive";
 
 type Chat = {
@@ -29,6 +31,7 @@ const Home = () => {
   const [roomId, setRoomId] = useState<string | null>(null);
   const [chats, setChats] = useState<Chat[]>([]);
   const [chatInput, setChatInput] = useState<string>("");
+  const scrollAreaRef = useRef<HTMLDivElement | null>(null);
 
   const isMobileView = useMediaQuery({ query: "(max-width: 750px)" });
 
@@ -117,6 +120,10 @@ const Home = () => {
         ];
       });
     });
+    scrollAreaRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "end",
+    });
     return () => {
       socket.off(SOCKET_EVENTS.MESSAGE_SENT);
     };
@@ -125,6 +132,10 @@ const Home = () => {
   const handleChat = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!socket || !myId || !roomId) return;
+    scrollAreaRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "end",
+    });
     socket.emit(SOCKET_EVENTS.MESSAGE_SENT, roomId, myId, chatInput);
     setChats((prev) => {
       return [
@@ -153,7 +164,9 @@ const Home = () => {
               </div>
             </>
           ) : null}
-          {otherPlayer ? (
+          {waitingForMatch ? (
+            <Skeleton className="overflow-hidden border rounded-lg w-[90%] h-[40vh] bg-gray-400" />
+          ) : otherPlayer ? (
             <>
               {Object.keys(otherPlayer).map((key) => {
                 const { url, muted } = otherPlayer[key];
@@ -173,15 +186,26 @@ const Home = () => {
     }
     return (
       <div className="flex flex-col items-center justify-center gap-4 w-7/12">
-        {player &&
-          Object.keys(player).map((key) => {
-            const { url, muted } = player[key];
+        {waitingForMatch ? (
+          <Skeleton className="overflow-hidden border rounded-lg w-[96%] h-[45%] bg-gray-400" />
+        ) : otherPlayer ? (
+          Object.keys(otherPlayer).map((key) => {
+            const { url, muted } = otherPlayer[key];
             return (
               <div key={key} className="overflow-hidden border rounded-lg">
                 <Player url={url} muted={muted} />
               </div>
             );
-          })}
+          })
+        ) : null}
+
+        {myPlayer ? (
+          <>
+            <div className="overflow-hidden border rounded-lg">
+              <Player url={myPlayer.url} muted={myPlayer.muted} active={true} />
+            </div>
+          </>
+        ) : null}
       </div>
     );
   };
@@ -202,9 +226,6 @@ const Home = () => {
         </button>
       );
     }
-    if (waitingForMatch) {
-      return <h1>waiting for a match...</h1>;
-    }
 
     return (
       <div
@@ -215,37 +236,44 @@ const Home = () => {
         }}
       >
         {handlePlayerView()}
-        <div className="flex h-full w-full items-center justify-center rounded-lg flex-col shadow-xl border">
-          <div className="flex flex-col h-full w-full overflow-auto gap-4 p-4 border-none">
-            {chats.map((chat, index) => {
-              return (
-                <div key={index} className="flex">
-                  <p
-                    className={cn(
-                      "text-lg font-normal flex-wrap inline-block bg-slate-200 px-4 py-1 rounded-xl",
-                      {
-                        "ml-auto": chat.senderPeerId !== myId,
-                        "bg-green-200": chat.senderPeerId !== myId,
-                      }
-                    )}
-                    style={{}}
-                  >
-                    {chat.content}
-                  </p>
-                </div>
-              );
-            })}
-          </div>
+        <div className="flex h-full w-full items-center justify-between rounded-lg flex-col shadow-xl border overflow-hidden">
+          <ScrollArea className="w-full">
+            <div
+              className="flex flex-col h-full w-full gap-4 p-4 border-none"
+              ref={scrollAreaRef}
+            >
+              {chats.map((chat, index) => {
+                return (
+                  <div key={index} className="flex w-full">
+                    <p
+                      className={cn(
+                        "text-sm md:text-md lg:text-lg font-normal flex-wrap inline-block bg-slate-200 px-4 py-1 rounded-xl",
+                        {
+                          "ml-auto": chat.senderPeerId !== myId,
+                          "bg-green-200": chat.senderPeerId !== myId,
+                          "text-right": chat.senderPeerId !== myId,
+                        }
+                      )}
+                      style={{}}
+                    >
+                      {chat.content}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
+          </ScrollArea>
           <form
-            className="sticky p-2 w-full flex flex-row gap-4"
+            className="p-2 w-full flex flex-row gap-4"
             onSubmit={handleChat}
           >
             <Input
               placeholder="say hi..."
               value={chatInput}
               onChange={(e) => setChatInput(e.target.value)}
+              disabled={waitingForMatch}
             />
-            <Button>Send</Button>
+            <Button disabled={waitingForMatch}>Send</Button>
           </form>
         </div>
       </div>
@@ -253,7 +281,7 @@ const Home = () => {
   };
 
   return (
-    <div className="w-screen h-screen flex items-center justify-center p-4">
+    <div className="w-screen h-screen flex items-center justify-center p-4 overflow-hidden">
       {handleScreen()}
     </div>
   );
