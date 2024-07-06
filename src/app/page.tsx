@@ -1,6 +1,7 @@
 "use client";
 
 import { AspectRatio } from "@/components/ui/aspect-ratio";
+import { Input } from "@/components/ui/input";
 import Player from "@/components/ui/player";
 import { useSocket } from "@/context/socket";
 import useMediaStream from "@/hooks/useMediaStream";
@@ -99,10 +100,10 @@ const Home = () => {
   const handlePlayerView = () => {
     if (isMobileView) {
       return (
-        <div className="relative flex gap-4 flex-col bg-red-400 h-full w-full items-center justify-center py-4">
+        <div className="relative flex gap-4 flex-col w-full items-center justify-center py-4">
           {myPlayer ? (
             <>
-              <div className="overflow-hidden absolute border w-[20%] top-5 right-5 rounded-lg z-[2]">
+              <div className="overflow-hidden absolute border w-[20%] top-0 right-0 rounded-lg z-[2]">
                 <Player
                   url={myPlayer.url}
                   muted={myPlayer.muted}
@@ -118,7 +119,7 @@ const Home = () => {
                 return (
                   <div
                     key={key}
-                    className="absolute w-[80%] mx-auto overflow-hidden top-10 z-[1] border rounded-lg"
+                    className="w-[80%] mx-auto overflow-hidden top-10 z-[1] border rounded-lg"
                   >
                     <Player url={url} muted={muted} />
                   </div>
@@ -130,7 +131,7 @@ const Home = () => {
       );
     }
     return (
-      <div className="flex flex-col items-center justify-center gap-4 pl-2">
+      <div className="flex flex-col items-center justify-center gap-4 w-7/12">
         {player &&
           Object.keys(player).map((key) => {
             const { url, muted } = player[key];
@@ -173,15 +174,18 @@ const Home = () => {
         }}
       >
         {handlePlayerView()}
-        <div className="flex bg-red-200 h-full w-full items-center justify-center border rounded-lg">
+        <div className="flex h-full w-full items-center justify-center border rounded-lg shadow-xl relative">
           <h1>chat</h1>
+          <div className="absolute bottom-0 p-2 w-full">
+            <Input placeholder="say hi..." />
+          </div>
         </div>
       </div>
     );
   };
 
   return (
-    <div className="w-screen h-screen flex items-center justify-center">
+    <div className="w-screen h-screen flex items-center justify-center p-4">
       {handleScreen()}
     </div>
   );

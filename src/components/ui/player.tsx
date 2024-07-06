@@ -18,7 +18,7 @@ const Player = ({ url, muted = false, active = false }: PlayerProps) => {
       playing={true}
       style={
         {
-          // borderRadius: "10px",
+          // aspectRatio: "9/16",
         }
       }
     />
