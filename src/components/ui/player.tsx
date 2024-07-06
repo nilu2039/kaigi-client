@@ -5,22 +5,23 @@ import ReactPlayer from "react-player";
 type PlayerProps = {
   url: string | MediaStream | string[] | SourceProps[] | undefined;
   muted?: boolean;
+  active?: boolean;
 };
 
-const Player = ({ url, muted = false }: PlayerProps) => {
+const Player = ({ url, muted = false, active = false }: PlayerProps) => {
   return (
-    <div className="w-full h-full">
-      <ReactPlayer
-        url={url}
-        muted={muted}
-        width={"100%"}
-        height={"100%"}
-        playing={true}
-        style={{
-          backgroundColor: "white",
-        }}
-      />
-    </div>
+    <ReactPlayer
+      url={url}
+      muted={muted}
+      width={"100%"}
+      height={"100%"}
+      playing={true}
+      style={
+        {
+          // borderRadius: "10px",
+        }
+      }
+    />
   );
 };
 
