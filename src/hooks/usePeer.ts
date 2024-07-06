@@ -1,21 +1,19 @@
 "use client";
 
-import { useSocket } from "@/context/socket";
 import { Peer } from "peerjs";
 import { useEffect, useRef, useState } from "react";
 
-type PeerState = {
-  roomId: string;
-};
+// type PeerState = {
+//   roomId: string;
+// };
 
-const usePeer = ({ roomId }: PeerState) => {
+const usePeer = () => {
   const isPeerSet = useRef(false);
   const [peer, setPeer] = useState<Peer | null>(null);
   const [myId, setMyId] = useState<string | null>(null);
-  const socket = useSocket();
 
   useEffect(() => {
-    if (isPeerSet.current || !socket) return;
+    if (isPeerSet.current) return;
     isPeerSet.current = true;
     (async () => {
       try {
@@ -27,7 +25,6 @@ const usePeer = ({ roomId }: PeerState) => {
         setPeer(myPeer);
         myPeer.on("open", (id) => {
           setMyId(id);
-          socket.emit("join-room", id, roomId);
         });
       } catch (error) {
         console.error(error);
@@ -36,7 +33,7 @@ const usePeer = ({ roomId }: PeerState) => {
     return () => {
       peer?.destroy();
     };
-  }, [socket, roomId, peer]);
+  }, [peer]);
   return {
     peer,
     myId,

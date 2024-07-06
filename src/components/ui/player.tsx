@@ -16,6 +16,9 @@ const Player = ({ url, muted = false }: PlayerProps) => {
         width={"100%"}
         height={"100%"}
         playing={true}
+        style={{
+          backgroundColor: "white",
+        }}
       />
     </div>
   );
