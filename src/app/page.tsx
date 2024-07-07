@@ -128,10 +128,6 @@ const Home = () => {
         ];
       });
     });
-    scrollAreaRef.current?.scrollIntoView({
-      behavior: "smooth",
-      block: "end",
-    });
     return () => {
       socket.off(SOCKET_EVENTS.MESSAGE_SENT);
     };
@@ -159,10 +155,6 @@ const Home = () => {
   const handleChat = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!socket || !myPeerId || !roomId || !chatInput) return;
-    scrollAreaRef.current?.scrollIntoView({
-      behavior: "smooth",
-      block: "end",
-    });
     socket.emit(SOCKET_EVENTS.MESSAGE_SENT, roomId, myPeerId, chatInput);
     setChats((prev) => {
       return [
@@ -175,6 +167,15 @@ const Home = () => {
     });
     setChatInput("");
   };
+
+  useEffect(() => {
+    if (scrollAreaRef.current) {
+      scrollAreaRef.current.scrollTo({
+        top: scrollAreaRef.current.scrollHeight,
+        behavior: "smooth",
+      });
+    }
+  }, [chats]);
 
   const handlePlayerView = () => {
     if (isMobileView) {
