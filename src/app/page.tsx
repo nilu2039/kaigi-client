@@ -23,8 +23,8 @@ const Home = () => {
   const { myId, peer } = usePeer();
   const socket = useSocket();
   const { mediaStream } = useMediaStream();
-  const { player, setPlayer, myPlayer, otherPlayer } = usePlayer({
-    activeId: myId,
+  const { player, setPlayer } = usePlayer({
+    myId,
   });
   const [waitingForMatch, setWaitingForMatch] = useState(false);
   const [showInitScreen, setShowInitScreen] = useState(true);
@@ -59,7 +59,8 @@ const Home = () => {
         setPlayer((prev) => {
           return {
             ...prev,
-            [userId]: {
+            other: {
+              id: userId,
               url: incomingStream,
               muted: false,
             },
@@ -80,7 +81,8 @@ const Home = () => {
     setPlayer((prev) => {
       return {
         ...prev,
-        [myId]: {
+        me: {
+          id: myId,
           url: mediaStream,
           muted: true,
         },
@@ -96,7 +98,8 @@ const Home = () => {
         setPlayer((prev) => {
           return {
             ...prev,
-            [call.peer]: {
+            other: {
+              id: call.peer,
               url: incomingStream,
               muted: false,
             },
@@ -153,12 +156,13 @@ const Home = () => {
     if (isMobileView) {
       return (
         <div className="relative flex gap-4 flex-col w-full items-center justify-center py-4">
-          {myPlayer ? (
+          {player?.me ? (
             <>
               <div className="overflow-hidden absolute border w-[20%] top-0 right-0 rounded-lg z-[2]">
                 <Player
-                  url={myPlayer.url}
-                  muted={myPlayer.muted}
+                  playerKey={player?.me.id}
+                  url={player?.me.url}
+                  muted={player?.me.muted}
                   active={true}
                 />
               </div>
@@ -166,19 +170,15 @@ const Home = () => {
           ) : null}
           {waitingForMatch ? (
             <Skeleton className="overflow-hidden border rounded-lg w-[90%] h-[40vh] bg-gray-400" />
-          ) : otherPlayer ? (
+          ) : player?.other ? (
             <>
-              {Object.keys(otherPlayer).map((key) => {
-                const { url, muted } = otherPlayer[key];
-                return (
-                  <div
-                    key={key}
-                    className="w-[80%] mx-auto overflow-hidden top-10 z-[1] border rounded-lg"
-                  >
-                    <Player url={url} muted={muted} />
-                  </div>
-                );
-              })}
+              <div className="w-[80%] mx-auto overflow-hidden top-10 z-[1] border rounded-lg">
+                <Player
+                  playerKey={player.other.id}
+                  url={player?.other.url}
+                  muted={player?.other.muted}
+                />
+              </div>
             </>
           ) : null}
         </div>
@@ -188,21 +188,25 @@ const Home = () => {
       <div className="flex flex-col items-center justify-center gap-4 w-7/12">
         {waitingForMatch ? (
           <Skeleton className="overflow-hidden border rounded-lg w-[96%] h-[45%] bg-gray-400" />
-        ) : otherPlayer ? (
-          Object.keys(otherPlayer).map((key) => {
-            const { url, muted } = otherPlayer[key];
-            return (
-              <div key={key} className="overflow-hidden border rounded-lg">
-                <Player url={url} muted={muted} />
-              </div>
-            );
-          })
+        ) : player?.other ? (
+          <div className="overflow-hidden border rounded-lg">
+            <Player
+              playerKey={player.other.id}
+              url={player.other.url}
+              muted={player.other.muted}
+            />
+          </div>
         ) : null}
 
-        {myPlayer ? (
+        {player?.me ? (
           <>
             <div className="overflow-hidden border rounded-lg">
-              <Player url={myPlayer.url} muted={myPlayer.muted} active={true} />
+              <Player
+                playerKey={player.me.id}
+                url={player.me.url}
+                muted={player.me.muted}
+                active={true}
+              />
             </div>
           </>
         ) : null}
@@ -263,18 +267,29 @@ const Home = () => {
               })}
             </div>
           </ScrollArea>
-          <form
-            className="p-2 w-full flex flex-row gap-4"
-            onSubmit={handleChat}
-          >
-            <Input
-              placeholder="say hi..."
-              value={chatInput}
-              onChange={(e) => setChatInput(e.target.value)}
-              disabled={waitingForMatch}
-            />
-            <Button disabled={waitingForMatch}>Send</Button>
-          </form>
+          <div className="w-full flex flex-col items-center pb-2">
+            <form
+              className="p-2 w-full flex flex-row gap-4"
+              onSubmit={handleChat}
+            >
+              <Input
+                placeholder="say hi..."
+                value={chatInput}
+                onChange={(e) => setChatInput(e.target.value)}
+                disabled={waitingForMatch}
+              />
+              <Button disabled={waitingForMatch}>Send</Button>
+            </form>
+            <Button
+              className="w-1/4"
+              onClick={() => {
+                if (!socket) return;
+                socket.emit(SOCKET_EVENTS.NEXT_MATCH);
+              }}
+            >
+              Next
+            </Button>
+          </div>
         </div>
       </div>
     );

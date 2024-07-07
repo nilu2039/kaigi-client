@@ -1,16 +1,20 @@
-import React from "react";
+import React, { Key } from "react";
 import { SourceProps } from "react-player/base";
 import ReactPlayer from "react-player";
 
+type Url = string | MediaStream | string[] | SourceProps[] | undefined;
+
 type PlayerProps = {
-  url: string | MediaStream | string[] | SourceProps[] | undefined;
+  url: Url;
   muted?: boolean;
   active?: boolean;
+  playerKey?: Key;
 };
 
-const Player = ({ url, muted = false, active = false }: PlayerProps) => {
+const Player = ({ url, muted = false, playerKey }: PlayerProps) => {
   return (
     <ReactPlayer
+      key={playerKey}
       url={url}
       muted={muted}
       width={"100%"}
