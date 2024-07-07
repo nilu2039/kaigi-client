@@ -7,7 +7,7 @@ import { useEffect, useRef, useState } from "react";
 const usePeer = () => {
   const isPeerSet = useRef(false);
   const [peer, setPeer] = useState<Peer | null>(null);
-  const [myId, setMyId] = useState<string | null>(null);
+  const [myPeerId, setMyPeerId] = useState<string | null>(null);
 
   useEffect(() => {
     if (isPeerSet.current) return;
@@ -21,7 +21,7 @@ const usePeer = () => {
         });
         setPeer(myPeer);
         myPeer.on("open", (id) => {
-          setMyId(id);
+          setMyPeerId(id);
         });
       } catch (error) {
         console.error(error);
@@ -33,7 +33,7 @@ const usePeer = () => {
   }, [peer]);
   return {
     peer,
-    myId,
+    myPeerId,
   };
 };
 

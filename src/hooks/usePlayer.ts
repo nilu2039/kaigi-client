@@ -1,20 +1,19 @@
 import { useState } from "react";
 import { SourceProps } from "react-player/base";
 
-type Player = {
-  me?: {
-    id: string;
-    url: string | MediaStream | string[] | SourceProps[] | undefined;
-    muted: boolean;
-  } | null;
-  other?: {
-    id: string;
-    url: string | MediaStream | string[] | SourceProps[] | undefined;
-    muted: boolean;
-  } | null;
+type Url = string | MediaStream | string[] | SourceProps[] | undefined;
+type PlayerBody = {
+  id: string;
+  url: Url;
+  muted: boolean;
 };
 
-const usePlayer = ({ myId }: { myId?: string | null }) => {
+type Player = {
+  me?: PlayerBody | null;
+  other?: PlayerBody | null;
+};
+
+const usePlayer = () => {
   const [player, setPlayer] = useState<Player | null>(null);
 
   return {

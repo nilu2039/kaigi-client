@@ -6,11 +6,12 @@ import Player from "@/components/ui/player";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useSocket } from "@/context/socket";
+import { useMediaPermissions } from "@/hooks/permissions/useMediaPermissions";
 import useMediaStream from "@/hooks/useMediaStream";
 import usePeer from "@/hooks/usePeer";
 import usePlayer from "@/hooks/usePlayer";
 import { SOCKET_EVENTS } from "@/lib/constants";
-import { cn, sleep } from "@/lib/utils";
+import { cn, handlePermissionError, sleep } from "@/lib/utils";
 import { FormEvent, useEffect, useRef, useState } from "react";
 import { useMediaQuery } from "react-responsive";
 
@@ -21,13 +22,13 @@ type Chat = {
 
 const Home = () => {
   const [startMediaStream, setStartMediaStream] = useState(false);
+  const [mediaPermissions, requestMediaPermissions] = useMediaPermissions();
+  const [mediaPermissionDenied, setMediaPermissionDenied] = useState(false);
 
-  const { myId, peer } = usePeer();
+  const { myPeerId, peer } = usePeer();
   const socket = useSocket();
   const { mediaStream } = useMediaStream({ start: startMediaStream });
-  const { player, setPlayer } = usePlayer({
-    myId,
-  });
+  const { player, setPlayer } = usePlayer();
   const [waitingForMatch, setWaitingForMatch] = useState(false);
   const [showInitScreen, setShowInitScreen] = useState(true);
   const [roomId, setRoomId] = useState<string | null>(null);
@@ -40,29 +41,29 @@ const Home = () => {
   useEffect(() => {
     if (!socket) return;
     socket.on(SOCKET_EVENTS.MATCH_FOUND, (roomId: string | null) => {
-      if (!roomId || !myId) return;
-      console.log("Match found", roomId, myId);
+      if (!roomId || !myPeerId) return;
+      console.log("Match found", roomId, myPeerId);
       setRoomId(roomId);
       setWaitingForMatch(false);
-      socket.emit(SOCKET_EVENTS.JOIN_ROOM, myId, roomId);
+      socket.emit(SOCKET_EVENTS.JOIN_ROOM, myPeerId, roomId);
     });
     return () => {
       socket.off(SOCKET_EVENTS.MATCH_FOUND);
     };
-  }, [socket, myId]);
+  }, [socket, myPeerId]);
 
   useEffect(() => {
     if (!socket || !peer || !mediaStream) return;
 
-    const handleUserConnected = async (userId: string) => {
+    const handleUserConnected = async (peerId: string) => {
       await sleep(1000);
-      const call = peer.call(userId, mediaStream);
+      const call = peer.call(peerId, mediaStream);
       call.on("stream", (incomingStream) => {
         setPlayer((prev) => {
           return {
             ...prev,
             other: {
-              id: userId,
+              id: peerId,
               url: incomingStream,
               muted: false,
             },
@@ -79,18 +80,18 @@ const Home = () => {
   }, [socket, peer, mediaStream, setPlayer]);
 
   useEffect(() => {
-    if (!myId || !mediaStream) return;
+    if (!myPeerId || !mediaStream) return;
     setPlayer((prev) => {
       return {
         ...prev,
         me: {
-          id: myId,
+          id: myPeerId,
           url: mediaStream,
           muted: true,
         },
       };
     });
-  }, [mediaStream, myId, setPlayer]);
+  }, [mediaStream, myPeerId, setPlayer]);
 
   useEffect(() => {
     if (!peer || !mediaStream) return;
@@ -111,8 +112,10 @@ const Home = () => {
     });
   }, [peer, setPlayer, socket, mediaStream]);
 
+  console.log("Player", player);
+
   useEffect(() => {
-    if (!socket || !myId) return;
+    if (!socket || !myPeerId) return;
     socket.on(SOCKET_EVENTS.MESSAGE_SENT, (peerId: string, message: string) => {
       console.log("Message received", peerId, message);
       setChats((prev) => {
@@ -132,38 +135,41 @@ const Home = () => {
     return () => {
       socket.off(SOCKET_EVENTS.MESSAGE_SENT);
     };
-  }, [socket, myId]);
+  }, [socket, myPeerId]);
 
   useEffect(() => {
     if (!socket) return;
-    socket.on(SOCKET_EVENTS.USER_LEAVE_ROOM, (_: string) => {
-      setPlayer((prev) => {
-        return {
-          ...prev,
-          other: null,
-        };
-      });
+    socket.on(SOCKET_EVENTS.USER_LEAVE_ROOM, (id: string) => {
+      console.log("User left", id, player?.other?.id);
+      if (player?.other?.id === id) {
+        setPlayer((prev) => {
+          return {
+            ...prev,
+            other: null,
+          };
+        });
+      }
+      socket.emit(SOCKET_EVENTS.NEXT_MATCH);
     });
-    socket.emit(SOCKET_EVENTS.NEXT_MATCH);
     return () => {
       socket.off(SOCKET_EVENTS.USER_LEAVE_ROOM);
     };
-  }, [socket, setPlayer]);
+  }, [socket, setPlayer, player]);
 
   const handleChat = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!socket || !myId || !roomId || !chatInput) return;
+    if (!socket || !myPeerId || !roomId || !chatInput) return;
     scrollAreaRef.current?.scrollIntoView({
       behavior: "smooth",
       block: "end",
     });
-    socket.emit(SOCKET_EVENTS.MESSAGE_SENT, roomId, myId, chatInput);
+    socket.emit(SOCKET_EVENTS.MESSAGE_SENT, roomId, myPeerId, chatInput);
     setChats((prev) => {
       return [
         ...prev,
         {
           content: chatInput.trim(),
-          senderPeerId: myId,
+          senderPeerId: myPeerId,
         },
       ];
     });
@@ -269,7 +275,7 @@ const Home = () => {
                 return (
                   <div
                     className={cn("flex items-end space-x-2", {
-                      "justify-end": chat.senderPeerId === myId,
+                      "justify-end": chat.senderPeerId === myPeerId,
                     })}
                     key={String(index)}
                   >
@@ -277,7 +283,8 @@ const Home = () => {
                       className={cn(
                         "p-2 rounded-lg bg-gray-100 dark:bg-gray-800",
                         {
-                          "text-white bg-blue-500": chat.senderPeerId === myId,
+                          "text-white bg-blue-500":
+                            chat.senderPeerId === myPeerId,
                         }
                       )}
                     >
@@ -308,7 +315,7 @@ const Home = () => {
               <Button
                 className="w-1/4"
                 onClick={() => {
-                  if (!socket || !myId || !roomId) return;
+                  if (!socket || !myPeerId || !roomId) return;
                   socket.emit(SOCKET_EVENTS.USER_LEAVE_ROOM, roomId);
                   socket.emit(SOCKET_EVENTS.NEXT_MATCH);
                 }}
@@ -321,6 +328,39 @@ const Home = () => {
       </div>
     );
   };
+
+  const handlePermission = async () => {
+    const res = await requestMediaPermissions();
+    console.log("RES", res);
+    if (res) {
+      if (handlePermissionError(res) === "permission_denied_by_user") {
+        setMediaPermissionDenied(true);
+      }
+    }
+  };
+
+  if (mediaPermissionDenied) {
+    return (
+      <div className="w-screen h-screen flex items-center justify-center p-4 overflow-hidden flex-col gap-10">
+        <p className="text-2xl font-semibold text-center">
+          Permission to use camera and microphone was denied. To use this
+          feature, you need to allow access in your browser settings.
+        </p>
+        <Button onClick={() => window.location.reload()}>Try Again</Button>
+      </div>
+    );
+  }
+
+  if (!mediaPermissions.camera || !mediaPermissions.microphone) {
+    return (
+      <div className="w-screen h-screen flex items-center justify-center p-4 overflow-hidden">
+        <div className="flex flex-col items-center gap-4">
+          <h1 className="text-2xl font-bold">Permissions required</h1>
+          <Button onClick={handlePermission}>Allow permissions</Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-screen h-screen flex items-center justify-center p-4 overflow-hidden">
