@@ -1,9 +1,7 @@
 "use client";
-
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Player from "@/components/ui/player";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useSocket } from "@/context/socket";
 import { useMediaPermissions } from "@/hooks/permissions/useMediaPermissions";
@@ -22,7 +20,11 @@ type Chat = {
 
 const Home = () => {
   const [startMediaStream, setStartMediaStream] = useState(false);
-  const [mediaPermissions, requestMediaPermissions] = useMediaPermissions();
+  const {
+    mediaPermission,
+    checkPermissions: requestMediaPermissions,
+    isLoading: isMediaPermissionLoading,
+  } = useMediaPermissions();
   const [mediaPermissionDenied, setMediaPermissionDenied] = useState(false);
 
   const { myPeerId, peer } = usePeer();
@@ -340,6 +342,16 @@ const Home = () => {
     }
   };
 
+  if (isMediaPermissionLoading) {
+    return (
+      <div className="w-screen h-screen flex items-center justify-center p-4 overflow-hidden">
+        <div className="flex flex-col items-center gap-4">
+          <p className="text-2xl font-semibold">Requesting permissions...</p>
+        </div>
+      </div>
+    );
+  }
+
   if (mediaPermissionDenied) {
     return (
       <div className="w-screen h-screen flex items-center justify-center p-4 overflow-hidden flex-col gap-10">
@@ -352,7 +364,7 @@ const Home = () => {
     );
   }
 
-  if (!mediaPermissions.camera || !mediaPermissions.microphone) {
+  if (!mediaPermission.camera || !mediaPermission.microphone) {
     return (
       <div className="w-screen h-screen flex items-center justify-center p-4 overflow-hidden">
         <div className="flex flex-col items-center gap-4">

@@ -1,19 +1,21 @@
-import { handlePermissionError } from "@/lib/utils";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 
 type MediaPermissions = {
   camera: boolean;
   microphone: boolean;
 };
 
-export function useMediaPermissions(): [
-  MediaPermissions,
-  () => Promise<unknown | null>
-] {
+export function useMediaPermissions(): {
+  mediaPermission: MediaPermissions;
+  checkPermissions: () => Promise<unknown | null>;
+  isLoading: boolean;
+} {
   const [permissions, setPermissions] = useState<MediaPermissions>({
     camera: false,
     microphone: false,
   });
+
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const checkPermissions = async () => {
     try {
@@ -23,11 +25,14 @@ export function useMediaPermissions(): [
       });
       setPermissions({ camera: true, microphone: true });
       stream.getTracks().forEach((track) => track.stop());
+      localStorage.setItem("mediaPermission", "true");
       return null;
     } catch (err) {
       console.error("Error checking permissions:", err);
       setPermissions({ camera: false, microphone: false });
       return err;
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -35,5 +40,5 @@ export function useMediaPermissions(): [
     checkPermissions();
   }, []);
 
-  return [permissions, checkPermissions];
+  return { mediaPermission: permissions, checkPermissions, isLoading };
 }

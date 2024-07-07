@@ -9,8 +9,6 @@ export const sleep = async (ms: number) => {
   return new Promise((resolve) => setTimeout(resolve, ms));
 };
 
-// type PermissionErrorMessages = "Permission denied by user" | "No suitable camera and/or microphone found" | "Error accessing media devices:" | "Unknown error:";
-
 export const handlePermissionError = (error: unknown) => {
   if (error instanceof DOMException) {
     switch (error.name) {
