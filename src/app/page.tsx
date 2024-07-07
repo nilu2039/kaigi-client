@@ -20,9 +20,11 @@ type Chat = {
 };
 
 const Home = () => {
+  const [startMediaStream, setStartMediaStream] = useState(false);
+
   const { myId, peer } = usePeer();
   const socket = useSocket();
-  const { mediaStream } = useMediaStream();
+  const { mediaStream } = useMediaStream({ start: startMediaStream });
   const { player, setPlayer } = usePlayer({
     myId,
   });
@@ -117,7 +119,7 @@ const Home = () => {
         return [
           ...prev,
           {
-            content: message,
+            content: message.trim(),
             senderPeerId: peerId,
           },
         ];
@@ -132,9 +134,25 @@ const Home = () => {
     };
   }, [socket, myId]);
 
+  useEffect(() => {
+    if (!socket) return;
+    socket.on(SOCKET_EVENTS.USER_LEAVE_ROOM, (_: string) => {
+      setPlayer((prev) => {
+        return {
+          ...prev,
+          other: null,
+        };
+      });
+    });
+    socket.emit(SOCKET_EVENTS.NEXT_MATCH);
+    return () => {
+      socket.off(SOCKET_EVENTS.USER_LEAVE_ROOM);
+    };
+  }, [socket, setPlayer]);
+
   const handleChat = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!socket || !myId || !roomId) return;
+    if (!socket || !myId || !roomId || !chatInput) return;
     scrollAreaRef.current?.scrollIntoView({
       behavior: "smooth",
       block: "end",
@@ -144,7 +162,7 @@ const Home = () => {
       return [
         ...prev,
         {
-          content: chatInput,
+          content: chatInput.trim(),
           senderPeerId: myId,
         },
       ];
@@ -217,17 +235,18 @@ const Home = () => {
   const handleScreen = () => {
     if (showInitScreen) {
       return (
-        <button
+        <Button
           onClick={() => {
             if (!socket) return;
+            setStartMediaStream(true);
             setWaitingForMatch(true);
             setShowInitScreen(false);
             console.log("Finding match", socket.id);
             socket.emit(SOCKET_EVENTS.FIND_MATCH);
           }}
         >
-          connect
-        </button>
+          Connect
+        </Button>
       );
     }
 
@@ -241,54 +260,62 @@ const Home = () => {
       >
         {handlePlayerView()}
         <div className="flex h-full w-full items-center justify-between rounded-lg flex-col shadow-xl border overflow-hidden">
-          <ScrollArea className="w-full">
-            <div
-              className="flex flex-col h-full w-full gap-4 p-4 border-none"
+          <div className="flex flex-col h-full w-full">
+            <main
+              className="flex-1 overflow-y-auto p-4 space-y-4"
               ref={scrollAreaRef}
             >
               {chats.map((chat, index) => {
                 return (
-                  <div key={index} className="flex w-full">
-                    <p
+                  <div
+                    className={cn("flex items-end space-x-2", {
+                      "justify-end": chat.senderPeerId === myId,
+                    })}
+                    key={String(index)}
+                  >
+                    <div
                       className={cn(
-                        "text-sm md:text-md lg:text-lg font-normal flex-wrap inline-block bg-slate-200 px-4 py-1 rounded-xl",
+                        "p-2 rounded-lg bg-gray-100 dark:bg-gray-800",
                         {
-                          "ml-auto": chat.senderPeerId !== myId,
-                          "bg-green-200": chat.senderPeerId !== myId,
-                          "text-right": chat.senderPeerId !== myId,
+                          "text-white bg-blue-500": chat.senderPeerId === myId,
                         }
                       )}
-                      style={{}}
                     >
-                      {chat.content}
-                    </p>
+                      <p className="text-sm">{chat.content}</p>
+                    </div>
                   </div>
                 );
               })}
+            </main>
+            <div className="w-full flex flex-col items-center pb-2">
+              <form
+                className="flex items-center space-x-2 p-2 border-t w-full"
+                onSubmit={handleChat}
+              >
+                <Input
+                  className="flex-1"
+                  placeholder="say hi..."
+                  value={chatInput}
+                  onChange={(e) => {
+                    setChatInput(e.target.value);
+                  }}
+                  disabled={waitingForMatch}
+                />
+                <Button variant="outline" size="sm">
+                  Send
+                </Button>
+              </form>
+              <Button
+                className="w-1/4"
+                onClick={() => {
+                  if (!socket || !myId || !roomId) return;
+                  socket.emit(SOCKET_EVENTS.USER_LEAVE_ROOM, roomId);
+                  socket.emit(SOCKET_EVENTS.NEXT_MATCH);
+                }}
+              >
+                Next
+              </Button>
             </div>
-          </ScrollArea>
-          <div className="w-full flex flex-col items-center pb-2">
-            <form
-              className="p-2 w-full flex flex-row gap-4"
-              onSubmit={handleChat}
-            >
-              <Input
-                placeholder="say hi..."
-                value={chatInput}
-                onChange={(e) => setChatInput(e.target.value)}
-                disabled={waitingForMatch}
-              />
-              <Button disabled={waitingForMatch}>Send</Button>
-            </form>
-            <Button
-              className="w-1/4"
-              onClick={() => {
-                if (!socket) return;
-                socket.emit(SOCKET_EVENTS.NEXT_MATCH);
-              }}
-            >
-              Next
-            </Button>
           </div>
         </div>
       </div>

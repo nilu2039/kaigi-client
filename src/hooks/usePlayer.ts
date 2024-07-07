@@ -6,12 +6,12 @@ type Player = {
     id: string;
     url: string | MediaStream | string[] | SourceProps[] | undefined;
     muted: boolean;
-  };
+  } | null;
   other?: {
     id: string;
     url: string | MediaStream | string[] | SourceProps[] | undefined;
     muted: boolean;
-  };
+  } | null;
 };
 
 const usePlayer = ({ myId }: { myId?: string | null }) => {

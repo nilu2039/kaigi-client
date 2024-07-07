@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 
-const useMediaStream = () => {
+const useMediaStream = ({ start }: { start: boolean }) => {
   const isMediaStreamSet = useRef(false);
   const [mediaStream, setMediaSteam] = useState<MediaStream | null>(null);
 
   useEffect(() => {
-    if (isMediaStreamSet.current) return;
+    if (isMediaStreamSet.current || !start) return;
     isMediaStreamSet.current = true;
     (async () => {
       try {
@@ -18,7 +18,7 @@ const useMediaStream = () => {
         console.error(error);
       }
     })();
-  }, [mediaStream]);
+  }, [mediaStream, start]);
 
   //   useEffect(() => {
   //     return () => {
