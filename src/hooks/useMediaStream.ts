@@ -4,6 +4,12 @@ const useMediaStream = ({ start }: { start: boolean }) => {
   const isMediaStreamSet = useRef(false);
   const [mediaStream, setMediaSteam] = useState<MediaStream | null>(null);
 
+  const stopTracks = (stream: MediaStream) => {
+    stream.getTracks().forEach((track) => {
+      track.stop();
+    });
+  };
+
   useEffect(() => {
     if (isMediaStreamSet.current || !start) return;
     isMediaStreamSet.current = true;
@@ -31,7 +37,7 @@ const useMediaStream = ({ start }: { start: boolean }) => {
   //     };
   //   });
 
-  return { mediaStream };
+  return { mediaStream, stopTracks };
 };
 
 export default useMediaStream;

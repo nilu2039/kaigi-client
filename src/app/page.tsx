@@ -11,7 +11,8 @@ import usePlayer, { PlayerProps } from "@/hooks/usePlayer";
 import { SOCKET_EVENTS } from "@/lib/constants";
 import { cn, handlePermissionError, sleep } from "@/lib/utils";
 import { PlayerUrl } from "@/types/player";
-import { StepForward } from "lucide-react";
+import { LogOut, StepForward } from "lucide-react";
+import Image from "next/image";
 import { FormEvent, useEffect, useRef, useState } from "react";
 import { useMediaQuery } from "react-responsive";
 
@@ -32,7 +33,7 @@ const LargePlayer = ({
   muted: boolean;
 }) => {
   return (
-    <div className="overflow-hidden rounded-2xl border-gray-950 border-4">
+    <div className="overflow-hidden rounded-2xl border-primaryBtn border-[5px]">
       <Player playerKey={playerId} url={url} muted={muted} active={active} />
     </div>
   );
@@ -50,11 +51,11 @@ const MobilePlayer = ({
   muted: boolean;
 }) => {
   return me ? (
-    <div className="overflow-hidden absolute border-2 border-black w-[20%] top-0 right-0 rounded-xl z-[2]">
+    <div className="overflow-hidden absolute border-[2.5px] border-primaryBtn w-[20%] top-0 right-0 rounded-xl z-[2]">
       <Player playerKey={playerId} url={url} muted={muted} active={me} />
     </div>
   ) : (
-    <div className="w-[80%] mx-auto overflow-hidden top-10 z-[1] border-2 border-black rounded-2xl">
+    <div className="w-[80%] mx-auto overflow-hidden top-10 z-[1] border-[3px] border-primaryBtn border-black rounded-2xl">
       <Player playerKey={playerId} url={url} muted={muted} />
     </div>
   );
@@ -71,7 +72,9 @@ const Home = () => {
 
   const { myPeerId, peer } = usePeer();
   const socket = useSocket();
-  const { mediaStream } = useMediaStream({ start: startMediaStream });
+  const { mediaStream, stopTracks } = useMediaStream({
+    start: startMediaStream,
+  });
   const { player, setPlayer } = usePlayer();
   const [waitingForMatch, setWaitingForMatch] = useState(false);
   const [showInitScreen, setShowInitScreen] = useState(true);
@@ -179,18 +182,21 @@ const Home = () => {
 
   useEffect(() => {
     if (!socket) return;
-    socket.on(SOCKET_EVENTS.USER_LEAVE_ROOM, (id: string) => {
-      console.log("User left", id, player?.other?.id);
-      if (player?.other?.id === id) {
-        setPlayer((prev) => {
-          return {
-            ...prev,
-            other: null,
-          };
-        });
+    socket.on(
+      SOCKET_EVENTS.USER_LEAVE_ROOM,
+      (socketId: string, peerId?: string) => {
+        console.log("User left", socketId, player?.other?.id, peerId);
+        if (player?.other?.id === peerId) {
+          setPlayer((prev) => {
+            return {
+              ...prev,
+              other: null,
+            };
+          });
+          socket.emit(SOCKET_EVENTS.NEXT_MATCH);
+        }
       }
-      socket.emit(SOCKET_EVENTS.NEXT_MATCH);
-    });
+    );
     return () => {
       socket.off(SOCKET_EVENTS.USER_LEAVE_ROOM);
     };
@@ -210,6 +216,24 @@ const Home = () => {
       ];
     });
     setChatInput("");
+  };
+
+  const handleNextMatch = () => {
+    if (!socket || !myPeerId || !roomId) return;
+    socket.emit(SOCKET_EVENTS.USER_LEAVE_ROOM, roomId, myPeerId);
+    socket.emit(SOCKET_EVENTS.NEXT_MATCH);
+  };
+
+  const handleLeaveRoom = async () => {
+    if (socket && mediaStream && !roomId) {
+      window.location.reload();
+      return;
+    }
+    if (!socket || !roomId || !mediaStream) return;
+    socket.emit(SOCKET_EVENTS.USER_LEAVE_ROOM, roomId, myPeerId);
+    stopTracks(mediaStream);
+    setShowInitScreen(true);
+    window.location.reload();
   };
 
   useEffect(() => {
@@ -236,7 +260,7 @@ const Home = () => {
             </>
           ) : null}
           {waitingForMatch ? (
-            <Skeleton className="overflow-hidden border rounded-lg w-[90%] h-[40vh] bg-gray-400" />
+            <Skeleton className="overflow-hidden border-[3px] rounded-lg w-[100%] h-[40vh] bg-gray-400 border-primaryBtn" />
           ) : player?.other ? (
             <>
               <MobilePlayer
@@ -253,7 +277,7 @@ const Home = () => {
     return (
       <div className="flex flex-col items-center justify-center gap-4 w-7/12">
         {waitingForMatch ? (
-          <Skeleton className="overflow-hidden border rounded-lg w-[96%] h-[45%] bg-gray-400" />
+          <Skeleton className="overflow-hidden border-[5px] border-primaryBtn rounded-lg w-[100%] h-[45%] bg-gray-400" />
         ) : player?.other ? (
           <LargePlayer
             muted={player.other.muted}
@@ -279,24 +303,44 @@ const Home = () => {
   const handleScreen = () => {
     if (showInitScreen) {
       return (
-        <Button
-          onClick={() => {
-            if (!socket) return;
-            setStartMediaStream(true);
-            setWaitingForMatch(true);
-            setShowInitScreen(false);
-            console.log("Finding match", socket.id);
-            socket.emit(SOCKET_EVENTS.FIND_MATCH);
-          }}
-        >
-          Connect
-        </Button>
+        <div className="flex flex-1 h-full flex-col md:flex-row">
+          <div className="bg-introLeft flex items-center justify-center flex-[0.75] md:flex-[0.6] h-full flex-col">
+            <h2 className="text-white text-center font-bold font-poppins text-6xl md:text-5xl lg:text-6xl">
+              Talk to Strangers!
+            </h2>
+            <Image
+              alt="world-svg"
+              src={require("@/assets/svg/connected_world.svg")}
+              className="w-2/3 pt-10"
+            />
+          </div>
+          <div className="bg-introRight flex-[0.25] md:flex-[0.4] flex items-center justify-center flex-col gap-16">
+            <Image
+              alt="world-svg"
+              src={require("@/assets/svg/realtime_collaboration.svg")}
+              className="w-9/12 p-2 hidden md:block"
+            />
+            <Button
+              className="w-2/5 rounded-full bg-primaryBtn py-6"
+              onClick={() => {
+                if (!socket) return;
+                setStartMediaStream(true);
+                setWaitingForMatch(true);
+                setShowInitScreen(false);
+                console.log("Finding match", socket.id);
+                socket.emit(SOCKET_EVENTS.FIND_MATCH);
+              }}
+            >
+              Start Video
+            </Button>
+          </div>
+        </div>
       );
     }
 
     return (
       <div
-        className={"flex w-full h-full"}
+        className={"flex w-full h-full p-4 bg-primary"}
         style={{
           flexDirection: isMobileView ? "column" : "row",
           gap: isMobileView ? "0" : "0.5rem",
@@ -304,7 +348,7 @@ const Home = () => {
       >
         {handlePlayerView()}
         <div className="flex h-full w-full items-center justify-between flex-col overflow-hidden gap-2">
-          <div className="flex flex-col h-full w-full rounded-lg shadow-xl border">
+          <div className="flex flex-col h-full w-full rounded-lg shadow-xl border-primaryBtn border-2">
             <main
               className="flex-1 overflow-y-auto p-4 space-y-4"
               ref={scrollAreaRef}
@@ -334,7 +378,7 @@ const Home = () => {
             </main>
             <div className="w-full flex flex-col items-center">
               <form
-                className="flex items-center space-x-2 p-2 border-t w-full"
+                className="flex items-center space-x-2 p-2 w-full"
                 onSubmit={handleChat}
               >
                 <Input
@@ -346,7 +390,7 @@ const Home = () => {
                   }}
                   disabled={waitingForMatch}
                 />
-                <Button variant="outline" size="sm">
+                <Button className="bg-primaryBtn" size="sm">
                   Send
                 </Button>
               </form>
@@ -354,24 +398,27 @@ const Home = () => {
           </div>
           <div className="absolute md:relative bottom-[5.5rem] md:bottom-0 right-[2.5rem] md:clear-right">
             <StepForward
-              onClick={() => {
-                if (!socket || !myPeerId || !roomId) return;
-                socket.emit(SOCKET_EVENTS.USER_LEAVE_ROOM, roomId);
-                socket.emit(SOCKET_EVENTS.NEXT_MATCH);
-              }}
-              className="rounded-full bg-black text-white p-2 block md:hidden"
+              onClick={handleNextMatch}
+              className="rounded-full bg-primaryBtn text-white p-2 block md:hidden"
               size={40}
             />
-            <Button
-              className="rounded-2xl md:rounded-lg hidden md:block "
-              onClick={() => {
-                if (!socket || !myPeerId || !roomId) return;
-                socket.emit(SOCKET_EVENTS.USER_LEAVE_ROOM, roomId);
-                socket.emit(SOCKET_EVENTS.NEXT_MATCH);
-              }}
-            >
-              Next Match
-            </Button>
+            <div className="w-full flex flex-row gap-7">
+              <Button
+                variant="destructive"
+                className="rounded-2xl md:rounded-lg hidden md:flex flex-row items-center justify-center gap-1"
+                onClick={handleLeaveRoom}
+              >
+                <LogOut size={20} />
+                <p>Leave</p>
+              </Button>
+              <Button
+                className="rounded-2xl md:rounded-lg hidden md:flex flex-row items-center justify-center bg-primaryBtn gap-1"
+                onClick={handleNextMatch}
+              >
+                <p>Next Match</p>
+                <StepForward size={20} />
+              </Button>
+            </div>
           </div>
         </div>
       </div>
@@ -422,7 +469,7 @@ const Home = () => {
   }
 
   return (
-    <div className="w-screen h-screen flex items-center justify-center p-4 overflow-hidden">
+    <div className="w-screen h-screen flex items-center justify-center overflow-hidden">
       {handleScreen()}
     </div>
   );
