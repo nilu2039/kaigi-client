@@ -1,20 +1,19 @@
+import { PlayerUrl } from "@/types/player";
 import { useState } from "react";
-import { SourceProps } from "react-player/base";
 
-type Url = string | MediaStream | string[] | SourceProps[] | undefined;
 type PlayerBody = {
   id: string;
-  url: Url;
+  url: PlayerUrl;
   muted: boolean;
 };
 
-type Player = {
+export type PlayerProps = {
   me?: PlayerBody | null;
   other?: PlayerBody | null;
 };
 
 const usePlayer = () => {
-  const [player, setPlayer] = useState<Player | null>(null);
+  const [player, setPlayer] = useState<PlayerProps | null>(null);
 
   return {
     player,

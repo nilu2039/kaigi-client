@@ -1,11 +1,9 @@
-import React, { Key } from "react";
-import { SourceProps } from "react-player/base";
+import { PlayerUrl } from "@/types/player";
+import { Key } from "react";
 import ReactPlayer from "react-player";
 
-type Url = string | MediaStream | string[] | SourceProps[] | undefined;
-
 type PlayerProps = {
-  url: Url;
+  url: PlayerUrl;
   muted?: boolean;
   active?: boolean;
   playerKey?: Key;

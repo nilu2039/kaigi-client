@@ -7,15 +7,57 @@ import { useSocket } from "@/context/socket";
 import { useMediaPermissions } from "@/hooks/permissions/useMediaPermissions";
 import useMediaStream from "@/hooks/useMediaStream";
 import usePeer from "@/hooks/usePeer";
-import usePlayer from "@/hooks/usePlayer";
+import usePlayer, { PlayerProps } from "@/hooks/usePlayer";
 import { SOCKET_EVENTS } from "@/lib/constants";
 import { cn, handlePermissionError, sleep } from "@/lib/utils";
+import { PlayerUrl } from "@/types/player";
+import { StepForward } from "lucide-react";
 import { FormEvent, useEffect, useRef, useState } from "react";
 import { useMediaQuery } from "react-responsive";
 
 type Chat = {
   content: string;
   senderPeerId: string;
+};
+
+const LargePlayer = ({
+  playerId,
+  active = false,
+  muted,
+  url,
+}: {
+  playerId: string;
+  active?: boolean;
+  url: PlayerUrl;
+  muted: boolean;
+}) => {
+  return (
+    <div className="overflow-hidden rounded-2xl border-gray-950 border-4">
+      <Player playerKey={playerId} url={url} muted={muted} active={active} />
+    </div>
+  );
+};
+
+const MobilePlayer = ({
+  playerId,
+  me = false,
+  muted,
+  url,
+}: {
+  playerId: string;
+  me?: boolean;
+  url: PlayerUrl;
+  muted: boolean;
+}) => {
+  return me ? (
+    <div className="overflow-hidden absolute border-2 border-black w-[20%] top-0 right-0 rounded-xl z-[2]">
+      <Player playerKey={playerId} url={url} muted={muted} active={me} />
+    </div>
+  ) : (
+    <div className="w-[80%] mx-auto overflow-hidden top-10 z-[1] border-2 border-black rounded-2xl">
+      <Player playerKey={playerId} url={url} muted={muted} />
+    </div>
+  );
 };
 
 const Home = () => {
@@ -185,27 +227,24 @@ const Home = () => {
         <div className="relative flex gap-4 flex-col w-full items-center justify-center py-4">
           {player?.me ? (
             <>
-              <div className="overflow-hidden absolute border w-[20%] top-0 right-0 rounded-lg z-[2]">
-                <Player
-                  playerKey={player?.me.id}
-                  url={player?.me.url}
-                  muted={player?.me.muted}
-                  active={true}
-                />
-              </div>
+              <MobilePlayer
+                playerId={player?.me.id}
+                url={player?.me.url}
+                muted={player?.me.muted}
+                me={true}
+              />
             </>
           ) : null}
           {waitingForMatch ? (
             <Skeleton className="overflow-hidden border rounded-lg w-[90%] h-[40vh] bg-gray-400" />
           ) : player?.other ? (
             <>
-              <div className="w-[80%] mx-auto overflow-hidden top-10 z-[1] border rounded-lg">
-                <Player
-                  playerKey={player.other.id}
-                  url={player?.other.url}
-                  muted={player?.other.muted}
-                />
-              </div>
+              <MobilePlayer
+                playerId={player?.other.id}
+                url={player?.other.url}
+                muted={player?.other.muted}
+                me={false}
+              />
             </>
           ) : null}
         </div>
@@ -216,25 +255,21 @@ const Home = () => {
         {waitingForMatch ? (
           <Skeleton className="overflow-hidden border rounded-lg w-[96%] h-[45%] bg-gray-400" />
         ) : player?.other ? (
-          <div className="overflow-hidden border rounded-lg">
-            <Player
-              playerKey={player.other.id}
-              url={player.other.url}
-              muted={player.other.muted}
-            />
-          </div>
+          <LargePlayer
+            muted={player.other.muted}
+            playerId={player.other.id}
+            url={player.other.url}
+          />
         ) : null}
 
         {player?.me ? (
           <>
-            <div className="overflow-hidden border rounded-lg">
-              <Player
-                playerKey={player.me.id}
-                url={player.me.url}
-                muted={player.me.muted}
-                active={true}
-              />
-            </div>
+            <LargePlayer
+              active
+              muted={player.me.muted}
+              playerId={player.me.id}
+              url={player.me.url}
+            />
           </>
         ) : null}
       </div>
@@ -268,8 +303,8 @@ const Home = () => {
         }}
       >
         {handlePlayerView()}
-        <div className="flex h-full w-full items-center justify-between rounded-lg flex-col shadow-xl border overflow-hidden">
-          <div className="flex flex-col h-full w-full">
+        <div className="flex h-full w-full items-center justify-between flex-col overflow-hidden gap-2">
+          <div className="flex flex-col h-full w-full rounded-lg shadow-xl border">
             <main
               className="flex-1 overflow-y-auto p-4 space-y-4"
               ref={scrollAreaRef}
@@ -297,7 +332,7 @@ const Home = () => {
                 );
               })}
             </main>
-            <div className="w-full flex flex-col items-center pb-2">
+            <div className="w-full flex flex-col items-center">
               <form
                 className="flex items-center space-x-2 p-2 border-t w-full"
                 onSubmit={handleChat}
@@ -315,17 +350,28 @@ const Home = () => {
                   Send
                 </Button>
               </form>
-              <Button
-                className="w-1/4"
-                onClick={() => {
-                  if (!socket || !myPeerId || !roomId) return;
-                  socket.emit(SOCKET_EVENTS.USER_LEAVE_ROOM, roomId);
-                  socket.emit(SOCKET_EVENTS.NEXT_MATCH);
-                }}
-              >
-                Next
-              </Button>
             </div>
+          </div>
+          <div className="absolute md:relative bottom-[5.5rem] md:bottom-0 right-[2.5rem] md:clear-right">
+            <StepForward
+              onClick={() => {
+                if (!socket || !myPeerId || !roomId) return;
+                socket.emit(SOCKET_EVENTS.USER_LEAVE_ROOM, roomId);
+                socket.emit(SOCKET_EVENTS.NEXT_MATCH);
+              }}
+              className="rounded-full bg-black text-white p-2 block md:hidden"
+              size={40}
+            />
+            <Button
+              className="rounded-2xl md:rounded-lg hidden md:block "
+              onClick={() => {
+                if (!socket || !myPeerId || !roomId) return;
+                socket.emit(SOCKET_EVENTS.USER_LEAVE_ROOM, roomId);
+                socket.emit(SOCKET_EVENTS.NEXT_MATCH);
+              }}
+            >
+              Next Match
+            </Button>
           </div>
         </div>
       </div>
