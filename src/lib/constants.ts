@@ -1,7 +1,3 @@
-// export const SOCKET_URL = "http://localhost:4000";
-export const SOCKET_URL = "http://192.168.0.103:4000";
-export const PEER_HOST = "192.168.0.103";
-
 export const SOCKET_EVENTS = {
   FIND_MATCH: "find-match",
   JOIN_ROOM: "join-room",

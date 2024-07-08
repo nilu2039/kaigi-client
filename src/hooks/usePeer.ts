@@ -1,6 +1,5 @@
 "use client";
 
-import { PEER_HOST } from "@/lib/constants";
 import { Peer } from "peerjs";
 import { useEffect, useRef, useState } from "react";
 
@@ -15,7 +14,7 @@ const usePeer = () => {
     (async () => {
       try {
         const myPeer = new Peer({
-          host: PEER_HOST,
+          host: process.env.NEXT_PUBLIC_PEER_HOST!,
           path: "/peer",
           port: 9000,
         });

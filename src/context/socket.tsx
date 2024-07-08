@@ -1,6 +1,5 @@
 "use client";
 
-import { SOCKET_URL } from "@/lib/constants";
 import React, { ReactNode, useContext, useEffect } from "react";
 import { Socket, io } from "socket.io-client";
 
@@ -19,7 +18,7 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     console.log("Connecting to socket server");
-    const connection = io(SOCKET_URL);
+    const connection = io(process.env.NEXT_PUBLIC_SOCKET_URL!);
     setSocket(connection);
     return () => {
       connection.close();
