@@ -26,17 +26,6 @@ const useMediaStream = ({ start }: { start: boolean }) => {
     })();
   }, [mediaStream, start]);
 
-  //   useEffect(() => {
-  //     return () => {
-  //       console.log("Stopping media stream 2");
-  //       if (mediaStream) {
-  //         mediaStream.getTracks().forEach((track) => {
-  //           track.stop();
-  //         });
-  //       }
-  //     };
-  //   });
-
   return { mediaStream, stopTracks };
 };
 
