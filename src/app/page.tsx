@@ -316,7 +316,7 @@ const Home = () => {
           </div>
           <div className="bg-introRight flex-[0.25] md:flex-[0.4] flex items-center justify-center flex-col gap-16">
             <Image
-              alt="world-svg"
+              alt="realtime-svg"
               src={require("@/assets/svg/realtime_collaboration.svg")}
               className="w-9/12 p-2 hidden md:block"
             />
@@ -437,9 +437,16 @@ const Home = () => {
 
   if (isMediaPermissionLoading) {
     return (
-      <div className="w-screen h-screen flex items-center justify-center p-4 overflow-hidden">
-        <div className="flex flex-col items-center gap-4">
-          <p className="text-2xl font-semibold">Requesting permissions...</p>
+      <div className="w-screen h-screen flex items-center justify-center p-4 overflow-hidden bg-introLeft">
+        <div className="flex flex-col items-center gap-10">
+          <Image
+            alt="world-svg"
+            src={require("@/assets/svg/realtime_collaboration.svg")}
+            className="w-[60%] p-2 animate-spin"
+          />
+          <p className="text-3xl md:text-4xl font-semibold text-white font-poppins">
+            Loading please wait...
+          </p>
         </div>
       </div>
     );
