@@ -19,9 +19,11 @@ const Player = ({ url, muted = false, playerKey }: PlayerProps) => {
       height={"100%"}
       playing={true}
       controls={false}
-      style={{
-        aspectRatio: 16 / 9,
-      }}
+      style={
+        {
+          // aspectRatio: 16 / 9,
+        }
+      }
     />
   );
 };
