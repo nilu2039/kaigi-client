@@ -340,14 +340,14 @@ const Home = () => {
 
     return (
       <div
-        className={"flex w-full h-full p-4 bg-primary"}
+        className={"flex w-full h-full p-4 bg-primary "}
         style={{
           flexDirection: isMobileView ? "column" : "row",
           gap: isMobileView ? "0" : "0.5rem",
         }}
       >
         {handlePlayerView()}
-        <div className="flex h-full w-full items-center justify-between flex-col overflow-hidden gap-2">
+        <div className="flex h-full w-full items-center justify-between flex-col overflow-hidden gap-2 relative">
           <div className="flex flex-col h-full w-full rounded-lg shadow-xl border-primaryBtn border-2">
             <main
               className="flex-1 overflow-y-auto p-4 space-y-4"
@@ -396,11 +396,11 @@ const Home = () => {
               </form>
             </div>
           </div>
-          <div className="absolute md:relative bottom-[5.5rem] md:bottom-0 right-[2.5rem] md:clear-right">
+          <div className="md:clear-right">
             <StepForward
               onClick={handleNextMatch}
-              className="rounded-full bg-primaryBtn text-white p-2 block md:hidden"
-              size={40}
+              className="absolute bottom-[4.5rem] md:bottom-0 right-[1rem] md:relative rounded-full bg-primaryBtn text-white p-2 block md:hidden"
+              size={35}
             />
             <div className="w-full flex flex-row gap-7">
               <Button
@@ -476,7 +476,7 @@ const Home = () => {
   }
 
   return (
-    <div className="w-screen h-screen flex items-center justify-center overflow-hidden">
+    <div className="w-screen h-svh flex items-center justify-center overflow-hidden">
       {handleScreen()}
     </div>
   );

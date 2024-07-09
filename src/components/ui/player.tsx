@@ -18,6 +18,7 @@ const Player = ({ url, muted = false, playerKey }: PlayerProps) => {
       width={"100%"}
       height={"100%"}
       playing={true}
+      playsinline
       controls={false}
       style={
         {
