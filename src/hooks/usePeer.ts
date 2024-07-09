@@ -7,7 +7,6 @@ const usePeer = () => {
   const isPeerSet = useRef(false);
   const [peer, setPeer] = useState<Peer | null>(null);
   const [myPeerId, setMyPeerId] = useState<string | null>(null);
-
   useEffect(() => {
     if (isPeerSet.current) return;
     isPeerSet.current = true;
@@ -17,6 +16,7 @@ const usePeer = () => {
           host: process.env.NEXT_PUBLIC_PEER_HOST!,
           path: "/peer",
           port: 9000,
+          secure: process.env.NEXT_PUBLIC_NODE_ENV === "production",
         });
         setPeer(myPeer);
         myPeer.on("open", (id) => {
