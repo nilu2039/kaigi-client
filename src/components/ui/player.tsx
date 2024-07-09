@@ -18,11 +18,7 @@ const Player = ({ url, muted = false, playerKey }: PlayerProps) => {
       width={"100%"}
       height={"100%"}
       playing={true}
-      style={
-        {
-          // aspectRatio: "9/16",
-        }
-      }
+      controls={false}
     />
   );
 };
