@@ -87,11 +87,11 @@ const Home = () => {
 
   useEffect(() => {
     if (!socket) return;
-    socket.on(SOCKET_EVENTS.MATCH_FOUND, (roomId: string | null) => {
+    socket.on(SOCKET_EVENTS.MATCH_FOUND, async (roomId: string | null) => {
       if (!roomId || !myPeerId) return;
       console.log("Match found", roomId, myPeerId);
       setRoomId(roomId);
-      setWaitingForMatch(false);
+      await sleep(2000);
       socket.emit(SOCKET_EVENTS.JOIN_ROOM, myPeerId, roomId);
     });
     return () => {
@@ -103,7 +103,8 @@ const Home = () => {
     if (!socket || !peer || !mediaStream) return;
 
     const handleUserConnected = async (peerId: string) => {
-      await sleep(1000);
+      await sleep(2000);
+      setWaitingForMatch(false);
       const call = peer.call(peerId, mediaStream);
       call.on("stream", (incomingStream) => {
         setPlayer((prev) => {
@@ -143,6 +144,8 @@ const Home = () => {
   useEffect(() => {
     if (!peer || !mediaStream) return;
     peer.on("call", (call) => {
+      console.log("Call received", call.peer);
+      setWaitingForMatch(false);
       call.answer(mediaStream);
       call.on("stream", (incomingStream) => {
         setPlayer((prev) => {
