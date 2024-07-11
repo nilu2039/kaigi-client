@@ -12,8 +12,10 @@
 
     --intro-left: #00002e;
     --intro-right: #000000;
+    --new-primary: #262626;
+    --new-accent: #d57912;
 
-    --primary-btn: #0065dd;
+    --primary-btn: #d57912;
 
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
@@ -74,6 +76,7 @@
 @layer base {
   * {
     @apply border-border;
+    @apply font-mono;
   }
   body {
     @apply bg-background text-foreground;
