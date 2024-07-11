@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, Poppins } from "next/font/google";
 import "./globals.css";
 import { SocketProvider } from "@/context/socket";
+import { PlayerProvider } from "@/context/player";
 
 const inter = Inter({ subsets: ["latin"] });
 const poppins = Poppins({
@@ -21,11 +22,13 @@ export default function RootLayout({
 }>) {
   return (
     <SocketProvider>
-      <html lang="en">
-        <body className={`${inter.className} ${poppins.className}`}>
-          {children}
-        </body>
-      </html>
+      <PlayerProvider>
+        <html lang="en">
+          <body className={`${inter.className} ${poppins.className}`}>
+            {children}
+          </body>
+        </html>
+      </PlayerProvider>
     </SocketProvider>
   );
 }
