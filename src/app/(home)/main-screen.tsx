@@ -27,14 +27,7 @@ const MainScreen: FC<MainScreenProps> = ({
   const socket = useSocket();
   const isMobileView = useMediaQuery({ query: "(max-width: 750px)" });
 
-  const {
-    player,
-    chats,
-    setChats,
-    roomId,
-    waitingForMatch,
-    setWaitingForMatch,
-  } = usePlayer();
+  const { player, roomId, waitingForMatch, setWaitingForMatch } = usePlayer();
 
   const handleNextMatch = () => {
     if (!socket || !myPeerId || !roomId) return;
@@ -81,7 +74,6 @@ const MainScreen: FC<MainScreenProps> = ({
                 toggleMediaStream(true);
                 setWaitingForMatch(true);
                 setShowInitScreen(false);
-                console.log("Finding match", socket.id);
                 socket.emit(SOCKET_EVENTS.FIND_MATCH);
               }}
             >

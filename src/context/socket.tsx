@@ -14,7 +14,6 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
   const [socket, setSocket] = React.useState<Socket | null>(null);
 
   useEffect(() => {
-    console.log("Connecting to socket server");
     const connection = io(process.env.NEXT_PUBLIC_SOCKET_URL!);
     setSocket(connection);
     return () => {

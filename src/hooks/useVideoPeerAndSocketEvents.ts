@@ -23,7 +23,6 @@ const useVideoPeerAndSocketEvents = ({
     if (!socket) return;
     socket.on(SOCKET_EVENTS.MATCH_FOUND, async (roomId: string | null) => {
       if (!roomId || !myPeerId) return;
-      console.log("Match found", roomId, myPeerId);
       setRoomId(roomId);
       await sleep(2000);
       socket.emit(SOCKET_EVENTS.JOIN_ROOM, myPeerId, roomId);
@@ -64,7 +63,6 @@ const useVideoPeerAndSocketEvents = ({
   useEffect(() => {
     if (!peer || !mediaStream) return;
     peer.on("call", (call) => {
-      console.log("Call received", call.peer);
       setWaitingForMatch(false);
       call.answer(mediaStream);
       call.on("stream", (incomingStream) => {
@@ -85,7 +83,6 @@ const useVideoPeerAndSocketEvents = ({
   useEffect(() => {
     if (!socket || !myPeerId) return;
     socket.on(SOCKET_EVENTS.MESSAGE_SENT, (peerId: string, message: string) => {
-      console.log("Message received", peerId, message);
       setChats((prev) => {
         return [
           ...prev,
@@ -106,7 +103,6 @@ const useVideoPeerAndSocketEvents = ({
     socket.on(
       SOCKET_EVENTS.USER_LEAVE_ROOM,
       (socketId: string, peerId?: string) => {
-        console.log("User left", socketId, player?.other?.id, peerId);
         if (player?.other?.id === peerId) {
           setPlayer((prev) => {
             return {
@@ -115,13 +111,14 @@ const useVideoPeerAndSocketEvents = ({
             };
           });
           socket.emit(SOCKET_EVENTS.NEXT_MATCH);
+          setWaitingForMatch(true);
         }
       }
     );
     return () => {
       socket.off(SOCKET_EVENTS.USER_LEAVE_ROOM);
     };
-  }, [socket, setPlayer, player]);
+  }, [socket, setPlayer, player, setWaitingForMatch]);
 };
 
 export default useVideoPeerAndSocketEvents;

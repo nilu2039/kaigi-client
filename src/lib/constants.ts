@@ -8,4 +8,5 @@ export const SOCKET_EVENTS = {
   WAITING_FOR_MATCH: "waiting-for-match",
   MESSAGE_SENT: "message-sent",
   NEXT_MATCH: "next-match",
+  SYNC_WHITEBOARD: "sync-whiteboard",
 };
