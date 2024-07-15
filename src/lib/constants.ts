@@ -10,3 +10,7 @@ export const SOCKET_EVENTS = {
   NEXT_MATCH: "next-match",
   SYNC_WHITEBOARD: "sync-whiteboard",
 };
+
+export const APP_NAME = "Kaigi";
+export const APP_DESCRIPTION =
+  "Kaigi is an online platform that connects users with random strangers worldwide through video and text chat.";

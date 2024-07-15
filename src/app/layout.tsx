@@ -1,18 +1,19 @@
-import type { Metadata } from "next";
-import { Inter, Poppins } from "next/font/google";
-import "./globals.css";
-import { SocketProvider } from "@/context/socket";
 import { PlayerProvider } from "@/context/player";
+import { SocketProvider } from "@/context/socket";
+import { APP_DESCRIPTION, APP_NAME } from "@/lib/constants";
+import type { Metadata } from "next";
+import { Comic_Neue } from "next/font/google";
+import "./globals.css";
 
-const inter = Inter({ subsets: ["latin"] });
-const poppins = Poppins({
-  weight: ["400", "500", "600", "700", "800", "900"],
+const comic_neue = Comic_Neue({
+  weight: ["400", "700"],
   subsets: ["latin"],
+  variable: "--font-comic-neue",
 });
 
 export const metadata: Metadata = {
-  title: "Dailogo",
-  description: "Talk to strangers anonymously",
+  title: APP_NAME,
+  description: APP_DESCRIPTION,
 };
 
 export default function RootLayout({
@@ -24,7 +25,7 @@ export default function RootLayout({
     <SocketProvider>
       <PlayerProvider>
         <html lang="en">
-          <body className={`${inter.className} ${poppins.className}`}>
+          <body className={`${comic_neue.variable} ${comic_neue.className}`}>
             {children}
           </body>
         </html>

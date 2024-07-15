@@ -8,6 +8,7 @@ import { FC, useState } from "react";
 import { useMediaQuery } from "react-responsive";
 import Chat from "./chat";
 import PlayerView from "./player-view";
+import Navbar from "@/components/ui/navbar";
 
 type MainScreenProps = {
   mediaStream: MediaStream | null;
@@ -128,7 +129,8 @@ const MainScreen: FC<MainScreenProps> = ({
     );
   };
   return (
-    <div className="w-screen h-svh flex items-center justify-center overflow-hidden">
+    <div className="w-screen h-svh flex items-center justify-center overflow-hidden flex-col">
+      <Navbar />
       {handleScreen()}
     </div>
   );

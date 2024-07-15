@@ -57,7 +57,7 @@ const Chat: FC<ChatProps> = ({ myPeerId }) => {
             ref={scrollAreaRef}
           >
             <Palette
-              className={`text-newAccent absolute top-4 right-4`}
+              className={`text-newAccent absolute top-1 right-1`}
               style={{
                 opacity: waitingForMatch ? 0.5 : 1,
                 cursor: waitingForMatch ? "not-allowed" : "pointer",
