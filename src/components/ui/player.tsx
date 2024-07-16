@@ -7,9 +7,15 @@ type PlayerProps = {
   muted?: boolean;
   active?: boolean;
   playerKey?: Key;
+  mirror?: boolean;
 };
 
-const Player = ({ url, muted = false, playerKey }: PlayerProps) => {
+const Player = ({
+  url,
+  muted = false,
+  playerKey,
+  mirror = false,
+}: PlayerProps) => {
   return (
     <ReactPlayer
       key={playerKey}
@@ -20,11 +26,9 @@ const Player = ({ url, muted = false, playerKey }: PlayerProps) => {
       playing={true}
       playsinline
       controls={false}
-      style={
-        {
-          // aspectRatio: 16 / 9,
-        }
-      }
+      style={{
+        transform: mirror ? "scaleX(-1)" : "scaleX(1)",
+      }}
     />
   );
 };

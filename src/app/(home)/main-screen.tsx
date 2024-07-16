@@ -106,6 +106,11 @@ const MainScreen: FC<MainScreenProps> = ({
               className="absolute bottom-[4.5rem] md:bottom-0 right-[1rem] md:relative rounded-full bg-primaryBtn text-white p-2 block md:hidden"
               size={35}
             />
+            <LogOut
+              size={35}
+              onClick={handleLeaveRoom}
+              className="absolute bottom-[7.5rem] right-[1rem] md:relative rounded-full bg-red-500 text-white p-2 block md:hidden"
+            />
             <div className="w-full flex flex-row gap-7">
               <Button
                 variant="destructive"
