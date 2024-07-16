@@ -1,24 +1,40 @@
 import { PlayerUrl } from "@/types/player";
 import React from "react";
 import Player from "./player";
+import { cn } from "@/lib/utils";
+
+type Props = {
+  playerId: string;
+  me?: boolean;
+  url: PlayerUrl;
+  muted: boolean;
+} & React.HTMLProps<HTMLDivElement>;
 
 const MobileScreenPlayer = ({
   playerId,
   me = false,
   muted,
   url,
-}: {
-  playerId: string;
-  me?: boolean;
-  url: PlayerUrl;
-  muted: boolean;
-}) => {
+  className,
+  ...props
+}: Props) => {
   return me ? (
-    <div className="overflow-hidden absolute border-[2.5px] border-newAccent w-[20%] top-0 right-0 rounded-xl z-[2]">
+    <div
+      {...props}
+      className={cn(
+        "overflow-hidden absolute border-[2.5px] border-newAccent w-[25%] top-0 right-0 rounded-xl z-[2]",
+        className
+      )}
+    >
       <Player playerKey={playerId} url={url} muted={muted} active={me} mirror />
     </div>
   ) : (
-    <div className="w-[80%] mx-auto overflow-hidden top-10 z-[1] border-[3px] border-newAccent border-black rounded-2xl">
+    <div
+      className={cn(
+        "w-[70%] mx-auto overflow-hidden border-[3px] border-newAccent rounded-2xl",
+        className
+      )}
+    >
       <Player playerKey={playerId} url={url} muted={muted} mirror />
     </div>
   );

@@ -51,43 +51,46 @@ const MainScreen: FC<MainScreenProps> = ({
   const handleScreen = () => {
     if (showInitScreen) {
       return (
-        <div className="flex flex-1 h-full flex-col md:flex-row">
-          <div className="bg-introLeft flex items-center justify-center flex-[0.75] md:flex-[0.6] h-full flex-col">
-            <h2 className="text-white text-center font-bold text-5xl md:text-4xl lg:text-6xl">
-              Talk to Strangers!
-            </h2>
-            <Image
-              alt="world-svg"
-              src={require("@/assets/svg/connected_world.svg")}
-              className="w-2/3 pt-10"
-            />
+        <>
+          <Navbar />
+          <div className="flex flex-1 h-full flex-col md:flex-row w-full">
+            <div className="bg-introLeft flex items-center justify-center flex-[0.75] md:flex-[0.6] h-full flex-col">
+              <h2 className="text-white text-center font-bold text-5xl md:text-4xl lg:text-6xl">
+                Talk to Strangers!
+              </h2>
+              <Image
+                alt="world-svg"
+                src={require("@/assets/svg/connected_world.svg")}
+                className="w-2/3 pt-10"
+              />
+            </div>
+            <div className="bg-introRight flex-[0.25] md:flex-[0.4] flex items-center justify-center flex-col gap-16">
+              <Image
+                alt="realtime-svg"
+                src={require("@/assets/svg/realtime_collaboration.svg")}
+                className="w-9/12 p-2 hidden md:block"
+              />
+              <Button
+                className="w-2/5 rounded-full bg-primaryBtn py-6 text-lg"
+                onClick={() => {
+                  if (!socket) return;
+                  toggleMediaStream(true);
+                  setWaitingForMatch(true);
+                  setShowInitScreen(false);
+                  socket.emit(SOCKET_EVENTS.FIND_MATCH);
+                }}
+              >
+                Start Video
+              </Button>
+            </div>
           </div>
-          <div className="bg-introRight flex-[0.25] md:flex-[0.4] flex items-center justify-center flex-col gap-16">
-            <Image
-              alt="realtime-svg"
-              src={require("@/assets/svg/realtime_collaboration.svg")}
-              className="w-9/12 p-2 hidden md:block"
-            />
-            <Button
-              className="w-2/5 rounded-full bg-primaryBtn py-6 text-lg"
-              onClick={() => {
-                if (!socket) return;
-                toggleMediaStream(true);
-                setWaitingForMatch(true);
-                setShowInitScreen(false);
-                socket.emit(SOCKET_EVENTS.FIND_MATCH);
-              }}
-            >
-              Start Video
-            </Button>
-          </div>
-        </div>
+        </>
       );
     }
 
     return (
       <div
-        className={"flex w-full h-full p-4 bg-newPrimary"}
+        className={"flex flex-1 w-full h-full p-4 bg-newPrimary"}
         style={{
           flexDirection: isMobileView ? "column" : "row",
           gap: isMobileView ? "0" : "0.5rem",
@@ -134,8 +137,7 @@ const MainScreen: FC<MainScreenProps> = ({
     );
   };
   return (
-    <div className="w-screen h-svh flex items-center justify-center overflow-hidden flex-col">
-      <Navbar />
+    <div className="w-screen h-dvh flex items-center justify-center overflow-x-hidden flex-col">
       {handleScreen()}
     </div>
   );
