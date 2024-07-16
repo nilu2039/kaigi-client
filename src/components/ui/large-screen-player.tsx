@@ -15,7 +15,13 @@ const LargeScreenPlayer = ({
 }) => {
   return (
     <div className="overflow-hidden rounded-2xl border-newAccent border-[5px]">
-      <Player playerKey={playerId} url={url} muted={muted} active={active} />
+      <Player
+        playerKey={playerId}
+        url={url}
+        muted={muted}
+        active={active}
+        mirror
+      />
     </div>
   );
 };

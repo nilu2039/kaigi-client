@@ -15,11 +15,11 @@ const MobileScreenPlayer = ({
 }) => {
   return me ? (
     <div className="overflow-hidden absolute border-[2.5px] border-newAccent w-[20%] top-0 right-0 rounded-xl z-[2]">
-      <Player playerKey={playerId} url={url} muted={muted} active={me} />
+      <Player playerKey={playerId} url={url} muted={muted} active={me} mirror />
     </div>
   ) : (
     <div className="w-[80%] mx-auto overflow-hidden top-10 z-[1] border-[3px] border-newAccent border-black rounded-2xl">
-      <Player playerKey={playerId} url={url} muted={muted} />
+      <Player playerKey={playerId} url={url} muted={muted} mirror />
     </div>
   );
 };
