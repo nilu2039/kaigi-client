@@ -1,20 +1,31 @@
 import { PlayerUrl } from "@/types/player";
 import React from "react";
 import Player from "./player";
+import { cn } from "@/lib/utils";
+
+type Props = {
+  playerId: string;
+  active?: boolean;
+  url: PlayerUrl;
+  muted: boolean;
+} & React.HTMLProps<HTMLDivElement>;
 
 const LargeScreenPlayer = ({
   playerId,
   active = false,
   muted,
   url,
-}: {
-  playerId: string;
-  active?: boolean;
-  url: PlayerUrl;
-  muted: boolean;
-}) => {
+  className,
+  ...props
+}: Props) => {
   return (
-    <div className="overflow-hidden rounded-2xl border-newAccent border-[5px]">
+    <div
+      {...props}
+      className={cn(
+        "overflow-hidden rounded-2xl border-newAccent border-[3px]",
+        className
+      )}
+    >
       <Player
         playerKey={playerId}
         url={url}

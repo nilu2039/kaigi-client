@@ -18,7 +18,7 @@ const PlayerView: FC<PlayerViewProps> = ({
   const handlePlayerView = () => {
     if (isMobileView) {
       return (
-        <div className="relative flex gap-4 flex-col w-full items-center justify-center py-4">
+        <div className="relative flex  gap-4 flex-col w-full items-center justify-center py-4">
           {player?.me ? (
             <>
               <MobileScreenPlayer
@@ -45,14 +45,15 @@ const PlayerView: FC<PlayerViewProps> = ({
       );
     }
     return (
-      <div className="flex flex-col items-center justify-center gap-4 w-7/12">
+      <div className="flex h-full flex-col items-center justify-center gap-4 w-7/12">
         {waitingForMatch ? (
-          <Skeleton className="overflow-hidden border-[5px] border-newAccent rounded-lg w-[100%] h-[45%] bg-gray-400" />
+          <Skeleton className="overflow-hidden border-[5px] border-newAccent rounded-lg w-full h-[45%] bg-gray-400" />
         ) : player?.other ? (
           <LargeScreenPlayer
             muted={player.other.muted}
             playerId={player.other.id}
             url={player.other.url}
+            className="w-full"
           />
         ) : null}
 
@@ -63,6 +64,7 @@ const PlayerView: FC<PlayerViewProps> = ({
               muted={player.me.muted}
               playerId={player.me.id}
               url={player.me.url}
+              className="w-full"
             />
           </>
         ) : null}

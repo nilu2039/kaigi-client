@@ -1,3 +1,5 @@
+"use client";
+
 import { Github, Linkedin } from "lucide-react";
 import Image from "next/image";
 import { ReactNode } from "react";
@@ -26,7 +28,7 @@ const IconContainer = ({
 
 const Navbar = () => {
   return (
-    <div className="w-full overflow-hidden px-7 lg:px-10 bg-[#191919] flex flex-row items-center justify-between">
+    <nav className="w-full overflow-hidden px-7 lg:px-10 bg-[#191919] flex flex-row items-center justify-between">
       <div className="">
         <Image
           alt="logo"
@@ -60,7 +62,7 @@ const Navbar = () => {
           </IconContainer>
         </div>
       </div>
-    </div>
+    </nav>
   );
 };
 
