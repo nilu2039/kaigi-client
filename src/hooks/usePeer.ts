@@ -14,6 +14,16 @@ const usePeer = () => {
       host: process.env.NEXT_PUBLIC_PEER_HOST!,
       path: "/peer",
       secure: process.env.NEXT_PUBLIC_NODE_ENV === "production",
+      config: {
+        iceServers: [
+          { urls: "stun:stun.l.google.com:19302" },
+          {
+            urls: process.env.NEXT_PUBLIC_TURN_URL!,
+            username: process.env.NEXT_PUBLIC_TURN_USERNAME!,
+            credential: process.env.NEXT_PUBLIC_TURN_CREDENTIALS!,
+          },
+        ],
+      },
     } as PeerOptions;
     (async () => {
       try {
