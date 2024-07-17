@@ -2,7 +2,8 @@ import LargeScreenPlayer from "@/components/ui/large-screen-player";
 import MobileScreenPlayer from "@/components/ui/mobile-player";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PlayerProps } from "@/types/player";
-import React, { FC } from "react";
+import { useMeasure } from "@uidotdev/usehooks";
+import { FC } from "react";
 
 type PlayerViewProps = {
   isMobileView: boolean;
@@ -15,6 +16,8 @@ const PlayerView: FC<PlayerViewProps> = ({
   player,
   waitingForMatch,
 }) => {
+  const [myPlayerRef, myPlayerLayout] = useMeasure();
+
   const handlePlayerView = () => {
     if (isMobileView) {
       return (
@@ -45,29 +48,37 @@ const PlayerView: FC<PlayerViewProps> = ({
       );
     }
     return (
-      <div className="flex h-full flex-col items-center justify-center gap-4 w-7/12">
+      <div className="grid h-full grid-rows-[1fr 1fr] place-content-center gap-4 w-7/12">
         {waitingForMatch ? (
-          <Skeleton className="overflow-hidden border-[5px] border-newAccent rounded-lg w-full h-[45%] bg-gray-400" />
+          <Skeleton
+            className="overflow-hidden border-[5px] border-newAccent rounded-lg w-full bg-gray-400"
+            style={{
+              height: myPlayerLayout.height ? myPlayerLayout.height : "auto",
+            }}
+          />
         ) : player?.other ? (
           <LargeScreenPlayer
             muted={player.other.muted}
             playerId={player.other.id}
             url={player.other.url}
-            className="w-full"
+            // className="w-full"
           />
         ) : null}
 
         {player?.me ? (
           <>
             <LargeScreenPlayer
+              containerRef={myPlayerRef}
               active
               muted={player.me.muted}
               playerId={player.me.id}
               url={player.me.url}
-              className="w-full"
+              // className="w-full"
             />
           </>
-        ) : null}
+        ) : (
+          <p>loading...</p>
+        )}
       </div>
     );
   };
