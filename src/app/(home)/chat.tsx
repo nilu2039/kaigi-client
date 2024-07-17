@@ -49,7 +49,7 @@ const Chat: FC<ChatProps> = ({ myPeerId }) => {
   };
 
   return (
-    <div className="flex flex-col h-full w-full rounded-lg shadow-xl border-newAccent border-2">
+    <div className="flex flex-col h-full w-full rounded-xl shadow-xl bg-newSecondary">
       {!isDrawingMode ? (
         <>
           <main

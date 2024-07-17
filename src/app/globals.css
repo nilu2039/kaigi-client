@@ -12,10 +12,13 @@
 
     --intro-left: #00002e;
     --intro-right: #000000;
-    --new-primary: #262626;
-    --new-accent: #d57912;
+    /* --new-primary: #262626; */
+    --new-primary: #000000;
+    --new-accent: #1c72e9;
 
-    --primary-btn: #d57912;
+    --primary-btn: #1c72e9;
+
+    --new-secondary: #2c2c2c;
 
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;

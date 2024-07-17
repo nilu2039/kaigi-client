@@ -24,10 +24,7 @@ const LargeScreenPlayer = ({
     <div
       ref={containerRef}
       {...props}
-      className={cn(
-        "overflow-hidden rounded-2xl border-newAccent border-[3px]",
-        className
-      )}
+      className={cn("overflow-hidden rounded-2xl", className)}
     >
       <Player
         playerKey={playerId}
