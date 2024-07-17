@@ -28,7 +28,7 @@ const Player = ({
       controls={false}
       style={{
         transform: mirror ? "scaleX(-1)" : "scaleX(1)",
-        backgroundColor: "#191919",
+        backgroundColor: "#2c2c2c",
       }}
     />
   );

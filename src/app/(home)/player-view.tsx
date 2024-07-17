@@ -51,7 +51,7 @@ const PlayerView: FC<PlayerViewProps> = ({
       <div className="grid h-full grid-rows-[1fr 1fr] place-content-center gap-4 w-7/12">
         {waitingForMatch ? (
           <Skeleton
-            className="overflow-hidden border-[5px] border-newAccent rounded-lg w-full bg-gray-400"
+            className="overflow-hidden rounded-lg w-full bg-gray-400"
             style={{
               height: myPlayerLayout.height ? myPlayerLayout.height : "auto",
             }}

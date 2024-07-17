@@ -26,7 +26,7 @@ const MainScreen: FC<MainScreenProps> = ({
   const [showInitScreen, setShowInitScreen] = useState(true);
 
   const socket = useSocket();
-  const isMobileView = useMediaQuery({ query: "(max-width: 750px)" });
+  const isMobileView = useMediaQuery({ query: "(max-width: 600px)" });
 
   const { player, roomId, waitingForMatch, setWaitingForMatch, setChats } =
     usePlayer();

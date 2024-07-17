@@ -27,6 +27,7 @@ const config = {
         foreground: "hsl(var(--foreground))",
         introLeft: "var(--intro-left)",
         newPrimary: "var(--new-primary)",
+        newSecondary: "var(--new-secondary)",
         newAccent: "var(--new-accent)",
         introRight: "var(--intro-right)",
         primary: {
