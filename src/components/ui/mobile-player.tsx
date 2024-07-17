@@ -30,10 +30,7 @@ const MobileScreenPlayer = ({
     </div>
   ) : (
     <div
-      className={cn(
-        "w-[70%] mx-auto overflow-hidden border-[3px] border-newAccent rounded-2xl",
-        className
-      )}
+      className={cn("w-[70%] mx-auto overflow-hidden rounded-2xl", className)}
     >
       <Player playerKey={playerId} url={url} muted={muted} mirror />
     </div>
