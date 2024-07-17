@@ -22,7 +22,7 @@ const MobileScreenPlayer = ({
     <div
       {...props}
       className={cn(
-        "overflow-hidden absolute border-[2.5px] border-newAccent w-[25%] top-0 right-0 rounded-xl z-[2]",
+        "overflow-hidden absolute w-[25%] top-0 right-0 rounded-xl z-[2]",
         className
       )}
     >

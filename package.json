@@ -24,6 +24,7 @@
     "react-dom": "^18",
     "react-player": "^2.16.0",
     "react-responsive": "^10.0.0",
+    "react-spinners": "^0.14.1",
     "socket.io-client": "^4.7.5",
     "tailwind-merge": "^2.3.0",
     "tailwindcss-animate": "^1.0.7",

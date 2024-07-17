@@ -4,6 +4,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { PlayerProps } from "@/types/player";
 import { useMeasure } from "@uidotdev/usehooks";
 import { FC } from "react";
+import { BounceLoader } from "react-spinners";
 
 type PlayerViewProps = {
   isMobileView: boolean;
@@ -33,7 +34,7 @@ const PlayerView: FC<PlayerViewProps> = ({
             </>
           ) : null}
           {waitingForMatch ? (
-            <Skeleton className="overflow-hidden border-[3px] rounded-lg w-[100%] h-[40vh] bg-gray-400 border-newAccent" />
+            <Skeleton className="overflow-hidden rounded-lg w-[100%] h-[40vh] bg-gray-400" />
           ) : player?.other ? (
             <>
               <MobileScreenPlayer
@@ -77,7 +78,7 @@ const PlayerView: FC<PlayerViewProps> = ({
             />
           </>
         ) : (
-          <p>loading...</p>
+          <BounceLoader color="#f0f0f0" />
         )}
       </div>
     );
