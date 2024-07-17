@@ -2,7 +2,6 @@ import LargeScreenPlayer from "@/components/ui/large-screen-player";
 import MobileScreenPlayer from "@/components/ui/mobile-player";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PlayerProps } from "@/types/player";
-import { useMeasure } from "@uidotdev/usehooks";
 import { FC } from "react";
 import { BounceLoader } from "react-spinners";
 
@@ -17,12 +16,10 @@ const PlayerView: FC<PlayerViewProps> = ({
   player,
   waitingForMatch,
 }) => {
-  const [myPlayerRef, myPlayerLayout] = useMeasure();
-
   const handlePlayerView = () => {
     if (isMobileView) {
       return (
-        <div className="relative flex  gap-4 flex-col w-full items-center justify-center py-4">
+        <div className="relative flex gap-4 flex-col w-full items-center justify-center py-4">
           {player?.me ? (
             <>
               <MobileScreenPlayer
@@ -49,14 +46,9 @@ const PlayerView: FC<PlayerViewProps> = ({
       );
     }
     return (
-      <div className="grid h-full grid-rows-[1fr 1fr] place-content-center gap-4 w-7/12">
+      <div className="grid h-full grid-rows-[1fr_1fr] place-content-center gap-4 w-7/12">
         {waitingForMatch ? (
-          <Skeleton
-            className="overflow-hidden rounded-lg w-full bg-gray-400"
-            style={{
-              height: myPlayerLayout.height ? myPlayerLayout.height : "auto",
-            }}
-          />
+          <Skeleton className="overflow-hidden rounded-lg w-full bg-gray-400" />
         ) : player?.other ? (
           <LargeScreenPlayer
             muted={player.other.muted}
@@ -69,7 +61,6 @@ const PlayerView: FC<PlayerViewProps> = ({
         {player?.me ? (
           <>
             <LargeScreenPlayer
-              containerRef={myPlayerRef}
               active
               muted={player.me.muted}
               playerId={player.me.id}
@@ -78,7 +69,9 @@ const PlayerView: FC<PlayerViewProps> = ({
             />
           </>
         ) : (
-          <BounceLoader color="#f0f0f0" />
+          <div className="h-dvh w-full grid place-content-center">
+            <BounceLoader color="#f0f0f0" />
+          </div>
         )}
       </div>
     );

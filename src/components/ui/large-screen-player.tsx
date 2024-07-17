@@ -8,7 +8,6 @@ type Props = {
   active?: boolean;
   url: PlayerUrl;
   muted: boolean;
-  containerRef?: React.LegacyRef<HTMLDivElement> | undefined;
 } & React.HTMLProps<HTMLDivElement>;
 
 const LargeScreenPlayer = ({
@@ -17,15 +16,10 @@ const LargeScreenPlayer = ({
   muted,
   url,
   className,
-  containerRef,
   ...props
 }: Props) => {
   return (
-    <div
-      ref={containerRef}
-      {...props}
-      className={cn("overflow-hidden rounded-2xl", className)}
-    >
+    <div {...props} className={cn("overflow-hidden rounded-2xl", className)}>
       <Player
         playerKey={playerId}
         url={url}
