@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import Navbar from "@/components/ui/navbar";
 import { usePlayer } from "@/context/player";
 import { useSocket } from "@/context/socket";
 import { SOCKET_EVENTS } from "@/lib/constants";
@@ -8,7 +9,6 @@ import { FC, useState } from "react";
 import { useMediaQuery } from "react-responsive";
 import Chat from "./chat";
 import PlayerView from "./player-view";
-import Navbar from "@/components/ui/navbar";
 
 type MainScreenProps = {
   mediaStream: MediaStream | null;
@@ -28,10 +28,13 @@ const MainScreen: FC<MainScreenProps> = ({
   const socket = useSocket();
   const isMobileView = useMediaQuery({ query: "(max-width: 750px)" });
 
-  const { player, roomId, waitingForMatch, setWaitingForMatch } = usePlayer();
+  const { player, roomId, waitingForMatch, setWaitingForMatch, setChats } =
+    usePlayer();
 
   const handleNextMatch = () => {
     if (!socket || !myPeerId || !roomId) return;
+    setWaitingForMatch(true);
+    setChats([]);
     socket.emit(SOCKET_EVENTS.USER_LEAVE_ROOM, roomId, myPeerId);
     socket.emit(SOCKET_EVENTS.NEXT_MATCH);
   };
@@ -104,16 +107,25 @@ const MainScreen: FC<MainScreenProps> = ({
         <div className="flex h-full w-full items-center justify-between flex-col overflow-hidden gap-2 relative">
           <Chat myPeerId={myPeerId} />
           <div className="md:clear-right">
-            <StepForward
+            <Button
+              disabled={waitingForMatch}
+              className="absolute bottom-[4.5rem] md:bottom-0 right-[0.2rem] md:relative bg-inherit grid md:hidden place-content-center hover:bg-inherit"
               onClick={handleNextMatch}
-              className="absolute bottom-[4.5rem] md:bottom-0 right-[1rem] md:relative rounded-full bg-primaryBtn text-white p-2 block md:hidden"
-              size={35}
-            />
-            <LogOut
-              size={35}
+            >
+              <StepForward
+                className="rounded-full bg-primaryBtn text-white p-2"
+                size={35}
+              />
+            </Button>
+            <Button
               onClick={handleLeaveRoom}
-              className="absolute bottom-[7.5rem] right-[1rem] md:relative rounded-full bg-red-500 text-white p-2 block md:hidden"
-            />
+              className="absolute bottom-[7.5rem] right-[0.2rem] md:relative bg-inherit block md:hidden hover:bg-inherit"
+            >
+              <LogOut
+                size={35}
+                className="rounded-full bg-red-500 text-white p-2"
+              />
+            </Button>
             <div className="w-full flex flex-row gap-7">
               <Button
                 variant="destructive"
@@ -126,6 +138,7 @@ const MainScreen: FC<MainScreenProps> = ({
               <Button
                 className="rounded-2xl md:rounded-lg hidden md:flex flex-row items-center justify-center bg-primaryBtn gap-1"
                 onClick={handleNextMatch}
+                disabled={waitingForMatch}
               >
                 <p>Next Match</p>
                 <StepForward size={20} />
